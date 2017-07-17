@@ -1,0 +1,27 @@
+ Create Trigger buyNewPhone_Trigger
+    on [dbo].subscription
+	after insert
+ as
+    Create Table #tempTable(stock int)
+	  declare @amount int
+      declare @stock int
+      declare @product_id int
+      declare @usageAfter int
+
+
+	  select  @amount=amount ,@product_id=product_id from INSERTED
+	  select  @stock= sum(stock)  FROM [Farmdata].[dbo].products  where product_id = @product_id
+	  
+	  update products  set stock=@stock-@amount 
+	  OUTPUT  INSERTED.stock  
+	  into #tempTable
+	  where    product_id =@product_id
+	  select @usageAfter= stock FROM #tempTable
+	  if(@usageAfter <0)
+	     begin 
+	       Rollback  Transaction ;
+		 end
+ go 
+ insert into subscription(product_id,amount) values(200,40)
+ insert into subscription(product_id,amount) values(200,10)
+ 
