@@ -46,7 +46,9 @@ Create  proc [dbo].[buyNewPhone]
  @amount int
   as 
   begin 
+  --開始Transaction
   Begin Transaction [roll_back]
+  --建立 temp Table
   Create Table #tempTable(
   stock int
   )
@@ -60,7 +62,7 @@ Create  proc [dbo].[buyNewPhone]
   --select @usage = sum(amount) 
   --FROM [Farmdata].[dbo].subscription
   --       where    product_id like N'%'+@type+'%'
-		 
+  --先塞資料		 
   insert into subscription(product_id,amount) values(@type,@amount)
   update products 
       set stock=@stock-@amount 
@@ -68,6 +70,7 @@ Create  proc [dbo].[buyNewPhone]
 	  into #tempTable
 	  where    product_id =@type
 	  select @usageAfter = stock FROM #tempTable
+  --檢查塞進去的數據 小於0 ROLLBACK
   if(@usageAfter<0)
       begin 
         Rollback  Transaction [roll_back] 
