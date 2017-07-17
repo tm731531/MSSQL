@@ -1,3 +1,5 @@
+ --同時新增多筆有問題
+ 
  Create Trigger buyNewPhone_Trigger
     on [dbo].subscription
 	after insert
